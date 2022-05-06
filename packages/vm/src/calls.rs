@@ -114,6 +114,9 @@ where
     Ok(result)
 }
 
+// All contract parameters
+// Including access to storage, api, and context.
+// See Env and MessageInfo.
 pub fn call_execute<A, S, Q, U>(
     instance: &mut Instance<A, S, Q>,
     env: &Env,

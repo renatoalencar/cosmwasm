@@ -33,6 +33,7 @@ pub struct GasConfig {
 
 impl Default for GasConfig {
     fn default() -> Self {
+        /* Gas config for some external operations */
         // Target is 10^12 per millisecond (see GAS.md), i.e. 10^9 gas per µ second.
         const GAS_PER_US: u64 = 1_000_000_000;
         Self {
@@ -165,6 +166,7 @@ impl<A: BackendApi, S: Storage, Q: Querier> Environment<A, S, Q> {
             let func = instance.exports.get_function(name)?;
             Ok(func.clone())
         })?;
+        /* Call function (probably an entrypoint), although how does it exhausts from gas? */
         func.call(args).map_err(|runtime_err| -> VmError {
             self.with_wasmer_instance::<_, Never>(|instance| {
                 let err: VmError = match get_remaining_points(instance) {
@@ -347,6 +349,7 @@ pub fn process_gas_info<A: BackendApi, S: Storage, Q: Querier>(
     });
 
     // This tells wasmer how much more gas it can consume from this point in time.
+    // set new gas limit
     env.set_gas_left(new_limit);
 
     if info.externally_used + info.cost > gas_left {

@@ -89,6 +89,8 @@ where
         let mut import_obj = ImportObject::new();
         let mut env_imports = Exports::new();
 
+        /* Instantiate and add foreign functions */
+
         // Reads the database entry at the given key into the the value.
         // Returns 0 if key does not exist and pointer to result region otherwise.
         // Ownership of the key pointer is not transferred to the host.
@@ -218,6 +220,7 @@ where
 
         let wasmer_instance = Box::from(
             {
+                /* Why does it have a lock? */
                 let _lock = instantiation_lock.map(|l| l.lock().unwrap());
                 WasmerInstance::new(module, &import_obj)
             }
@@ -228,6 +231,7 @@ where
 
         let instance_ptr = NonNull::from(wasmer_instance.as_ref());
         env.set_wasmer_instance(Some(instance_ptr));
+        // set initial gas limit
         env.set_gas_left(gas_limit);
         env.move_in(backend.storage, backend.querier);
         let instance = Instance {
@@ -282,6 +286,7 @@ where
     /// This is a snapshot and multiple reports can be created during the lifetime of
     /// an instance.
     pub fn create_gas_report(&self) -> GasReport {
+        /* Gas report */
         let state = self.env.with_gas_state(|gas_state| gas_state.clone());
         let gas_left = self.env.get_gas_left();
         GasReport {

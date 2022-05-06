@@ -20,6 +20,8 @@ use super::limiting_tunables::LimitingTunables;
 /// https://github.com/WebAssembly/memory64/blob/master/proposals/memory64/Overview.md
 const MAX_WASM_MEMORY: usize = 4 * 1024 * 1024 * 1024;
 
+/* Gas cost function
+   Yeah, it's constant for all operations. */
 fn cost(_operator: &Operator) -> u64 {
     // A flat fee for each operation
     // The target is 1 Teragas per millisecond (see GAS.md).
@@ -37,6 +39,7 @@ pub fn make_compile_time_store(
     middlewares: &[Arc<dyn ModuleMiddleware>],
 ) -> Store {
     let gas_limit = 0;
+    /* Instantiate middlewares */
     let deterministic = Arc::new(Gatekeeper::default());
     let metering = Arc::new(Metering::new(gas_limit, cost));
 
@@ -58,6 +61,7 @@ pub fn make_compile_time_store(
         for middleware in middlewares {
             config.push_middleware(middleware.clone());
         }
+        /* Middlewares for determinism and metering for Gas */
         config.push_middleware(deterministic);
         config.push_middleware(metering);
         let engine = Universal::new(config).engine();
@@ -77,6 +81,7 @@ pub fn make_runtime_store(memory_limit: Option<Size>) -> Store {
 fn make_store_with_engine(engine: &dyn Engine, memory_limit: Option<Size>) -> Store {
     match memory_limit {
         Some(limit) => {
+            /* Add memory limit */
             let base = BaseTunables::for_target(&Target::default());
             let tunables = LimitingTunables::new(base, limit_to_pages(limit));
             Store::new_with_tunables(engine, tunables)

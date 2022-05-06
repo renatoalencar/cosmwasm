@@ -69,6 +69,7 @@ pub fn do_db_read<A: BackendApi, S: Storage, Q: Querier>(
     let key = read_region(&env.memory(), key_ptr, MAX_LENGTH_DB_KEY)?;
 
     let (result, gas_info) = env.with_storage_from_context::<_, _>(|store| Ok(store.get(&key)))?;
+    /* Example of processing external gas usage */
     process_gas_info::<A, S, Q>(env, gas_info)?;
     let value = result?;
 

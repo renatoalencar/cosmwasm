@@ -57,6 +57,7 @@ impl Gatekeeper {
 
 impl Default for Gatekeeper {
     fn default() -> Self {
+        /* Features config (disables non deterministic stuff) */
         Self::new(GatekeeperConfig {
             allow_floats: false,
             allow_feature_bulk_memory_operations: false,
@@ -625,6 +626,7 @@ impl FunctionMiddleware for FunctionGatekeeper {
             | Operator::I32x4TruncSatF32x4U
             | Operator::F32x4ConvertI32x4S
             | Operator::F32x4ConvertI32x4U => {
+                /* Disable floats */
                 if self.config.allow_floats {
                     state.push_operator(operator);
                     Ok(())
